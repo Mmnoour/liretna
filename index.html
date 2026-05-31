@@ -1,15 +1,121 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ليرتنا - حاسبة الفكة السورية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+            background: #1e1e1e;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        h1 { color: #4caf50; margin-bottom: 20px; }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+        label { display: block; margin-bottom: 5px; color: #aaa; }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #fff;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .radio-group {
+            margin: 10px 0;
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4caf50;
+            border: none;
+            color: white;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover { background: #45a049; }
+        .result {
+            margin-top: 25px;
+            padding: 15px;
+            background: #252525;
+            border-radius: 8px;
+            text-align: right;
+            display: none;
+            border-right: 5px solid #4caf50;
+        }
+        .result h3 { margin-top: 0; color: #4caf50; }
+        .result p { margin: 8px 0; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>💵 ليرتنا</h1>
+    <p style="color: #888; margin-bottom: 20px;">حاسبة الفكة الذكية للعملة السورية الجديدة والقديمة</p>
+    
+    <div class="form-group">
+        <label>المبلغ المتوفر بالعملة الجديدة:</label>
+        <input type="number" id="newCash" value="0" min="0">
+    </div>
+    
+    <div class="form-group">
+        <label>المبلغ المتوفر بالعملة القديمة:</label>
+        <input type="number" id="oldCash" value="0" min="0">
+    </div>
+    
+    <div class="form-group">
+        <label>تحديد سعر المنتج بالعملة:</label>
+        <div class="radio-group">
+            <label><input type="radio" name="price_type" value="new" checked> الجديدة</label>
+            <label><input type="radio" name="price_type" value="old"> القديمة</label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>سعر المنتج:</label>
+        <input type="number" id="price" placeholder="أدخل السعر هنا">
+    </div>
+    
+    <button onclick="calculateChange()">احسب الفكة</button>
+    
+    <div id="resultBox" class="result">
+        <h3>📊 النتيجة:</h3>
+        <p id="totalWallet"></p>
+        <p id="status"></p>
+        <p id="changeNew" style="font-weight: bold; color: #4caf50;"></p>
+        <p id="changeOld" style="font-weight: bold; color: #ff9800;"></p>
+    </div>
+</div>
+
+<script>
 function calculateChange() {
     let newCash = parseFloat(document.getElementById('newCash').value) || 0;
     let oldCash = parseFloat(document.getElementById('oldCash').value) || 0;
     let priceInput = parseFloat(document.getElementById('price').value) || 0;
     
-    // قراءة نوع العملة للسعر (جديدة أو قديمة)
-    let priceType = document.querySelector('input[name="price_type"]:checked')?.value || 'new';
+    let priceType = document.querySelector('input[name="price_type"]:checked').value;
     
-    // تحويل السعر للجديد: إذا كان السعر بالقديم نقسمه على 100
+    // حساب السعر والإجمالي مع حذف الصفرين (تقسيم على 100)
     let priceInNew = priceType === 'old' ? priceInput / 100 : priceInput;
-    
-    // إجمالي المحفظة بالجديد: القديم يُقسم على 100 (حذف الصفرين)
     let totalInNew = newCash + (oldCash / 100);
     
     let resultBox = document.getElementById('resultBox');
@@ -26,14 +132,11 @@ function calculateChange() {
     
     document.getElementById('status').innerText = "✅ المبلغ كافي!";
     
-    // الباقي الإجمالي بالعملة الجديدة
     let remainingInNew = totalInNew - priceInNew;
     
-    // معالجة الفكة: سحب الفئات الصحيحة بالجديد (مضاعفات الـ 10 ليرات جديدة)
+    // الفكة بمضاعفات الـ 10 ليرات جديدة
     let changeNewPart = Math.floor(remainingInNew / 10) * 10; 
-    let fraction = remainingInNew - changeNewPart; // الكسور (أقل من 10 ليرات جديدة)
-    
-    // تحويل الفراطة الباقية إلى عملة قديمة بضربها بـ 100
+    let fraction = remainingInNew - changeNewPart; 
     let changeOldPart = Math.round(fraction * 100); 
     
     document.getElementById('changeNew').innerText = `الباقي بالعملة الجديدة: ${changeNewPart} ليرة.`;
@@ -44,3 +147,7 @@ function calculateChange() {
         document.getElementById('changeOld').innerText = "";
     }
 }
+</script>
+
+</body>
+</html>
